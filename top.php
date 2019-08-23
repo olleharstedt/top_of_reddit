@@ -11,13 +11,6 @@ use Spatie\Async\Process;
 use Spatie\Async\Pool;
 use WebArticleExtractor\Extract;
 
-$result = Extract::extractFromURL(
-    'https://www.bbc.com/news/world-latin-america-49452789'
-);
-
-//print_r($result);
-echo wordwrap($result->text, 60, PHP_EOL);die;
-
 $links = [
     [
         'sub' => 'php'
@@ -49,9 +42,18 @@ foreach ($links as $link) {
         $a = $dom->find('#siteTable .top-matter .title a');
         $votes = $dom->find('#siteTable .score.unvoted');
         $tabs = strlen($link['sub']) < 7 ? "\t\t" : "\t";
+
+        $ext = Extract::extractFromURL($a->href);
+
+        //echo wordwrap($result->text, 60, PHP_EOL);die;
+
         return '[' . $link['sub'] . "]" . $tabs
             . $votes->text . ":\t"
-            . $a->text;
+            . $a->text . PHP_EOL
+            . "\t\t\t" . substr(wordwrap($ext->text, 60, PHP_EOL), 0, 400)
+            . PHP_EOL
+            . '----------------------------------------'
+            . PHP_EOL;
     })->then(function ($result) {
         echo $result . PHP_EOL;
     })->catch(function (Throwable $ex) {
