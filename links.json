@@ -1,0 +1,20 @@
+{
+    "period": "week",
+    "links": [
+        {
+            "sub": "php"
+        },
+        {
+            "sub": "programming"
+        },
+        {
+            "sub": "worldnews"
+        },
+        {
+            "sub": "news"
+        },
+        {
+            "sub": "compsci"
+        }
+    ]
+}
