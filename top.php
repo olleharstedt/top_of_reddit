@@ -4,6 +4,8 @@
  * Async lib: https://github.com/spatie/async
  */
 
+error_reporting(0);
+
 require "vendor/autoload.php";
 
 use PHPHtmlParser\Dom;
@@ -11,27 +13,13 @@ use Spatie\Async\Process;
 use Spatie\Async\Pool;
 use WebArticleExtractor\Extract;
 
-$links = [
-    [
-        'sub' => 'php'
-    ],
-    [
-        'sub' => 'programming'
-    ],
-    [
-        'sub' => 'worldnews'
-    ],
-    [
-        'sub' => 'news'
-    ],
-    [
-        'sub' => 'compsci'
-    ]
-];
+$links = json_decode(file_get_contents(__DIR__ . '/links.json'), true);
 
 $pool = Pool::create();
 
-foreach ($links as $link) {
+$period = $links['period'];
+
+foreach ($links['links'] as $link) {
     $pool[] = async(function () use ($link) {
         $bakedLink = sprintf(
             'https://old.reddit.com/r/%s/top/?sort=top&t=week',
@@ -45,8 +33,6 @@ foreach ($links as $link) {
 
         $ext = Extract::extractFromURL($a->href);
 
-        //echo wordwrap($result->text, 60, PHP_EOL);die;
-
         return '[' . $link['sub'] . "]" . $tabs
             . $votes->text . ":\t"
             . $a->text . PHP_EOL
@@ -57,7 +43,7 @@ foreach ($links as $link) {
     })->then(function ($result) {
         echo $result . PHP_EOL;
     })->catch(function (Throwable $ex) {
-        var_dump($ex->getMessage());
+        echo $ex->getMessage() . PHP_EOL;
     });
 }
 
