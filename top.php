@@ -19,11 +19,20 @@ $pool = Pool::create();
 
 $period = $links['period'];
 
+$opt = getopt('p:');
+if ($opt) {
+    $period = $opt['p'];
+    if (!in_array($period, ['day', 'week', 'month', 'year'])) {
+        die('Unknown period: ' . $period . PHP_EOL);
+    }
+}
+
 foreach ($links['links'] as $link) {
-    $pool[] = async(function () use ($link) {
+    $pool[] = async(function () use ($link, $period) {
         $bakedLink = sprintf(
-            'https://old.reddit.com/r/%s/top/?sort=top&t=week',
-            $link['sub']
+            'https://old.reddit.com/r/%s/top/?sort=top&t=%s',
+            $link['sub'],
+            $period
         );
         $dom = new Dom();
         $dom->loadFromUrl($bakedLink);
