@@ -1,20 +1,14 @@
 {
-    "period": "week",
+    "period": "day",
     "links": [
+        {
+            "sub": "vim"
+        },
         {
             "sub": "php"
         },
         {
-            "sub": "programming"
-        },
-        {
             "sub": "worldnews"
-        },
-        {
-            "sub": "news"
-        },
-        {
-            "sub": "compsci"
         }
     ]
 }

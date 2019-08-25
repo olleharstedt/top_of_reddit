@@ -3,6 +3,7 @@
     "require": {
         "paquettg/php-html-parser": "^2.1",
         "spatie/async": "^1.0",
-        "zackslash/php-web-article-extractor": "^0.1.2"
+        "zackslash/php-web-article-extractor": "^0.1.2",
+        "mpdf/mpdf": "^8.0"
     }
 }
