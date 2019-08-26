@@ -28,4 +28,17 @@ class Link
             $period
         );
     }
+
+    /**
+     * @return Link[]
+     */
+    public static function getLinksFromJson(string $file)
+    {
+        $links = [];
+        $json = json_decode(file_get_contents($file), true);
+        foreach ($json['links'] as $item) {
+            $links[] = new Link($item);
+        }
+        return $links;
+    }
 }

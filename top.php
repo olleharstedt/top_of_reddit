@@ -5,24 +5,26 @@
  * PDF: https://mpdf.github.io/
  */
 
-//error_reporting(0);
-
 namespace olleharstedt\top_of_reddit;
+
+error_reporting(0);
 
 require "vendor/autoload.php";
 require "src/Link.php";
+require "src/Misc.php";
 
 use PHPHtmlParser\Dom;
 use Spatie\Async\Process;
 use Spatie\Async\Pool;
 use WebArticleExtractor\Extract;
 use Mpdf\Mpdf;
+use olleharstedt\top_of_reddit\misc;
 
-$links = json_decode(file_get_contents(__DIR__ . '/links.json'), true);
+$links = Link::getLinksFromJson(__DIR__ . '/links.json');
 
 $pool = Pool::create();
 
-$period = $links['period'];
+$period = "day";
 
 //$ext = Extract::extractFromURL('https://www.theguardian.com/world/2019/aug/25/trump-officials-voice-anger-at-g7-focus-on-niche-issues-such-as-climate-change');
 //echo ($ext->text);
@@ -52,11 +54,8 @@ if ($opt) {
 
 $output = '';
 
-foreach ($links['links'] as $link) {
+foreach ($links as $link) {
     try {
-        /** @var Link */
-        $link = new Link($link);
-
         $bakedLink = $link->getBakedLink($period);
 
         $dom = new Dom();
@@ -76,8 +75,8 @@ foreach ($links['links'] as $link) {
         $dom->loadFromUrl($href);
         $a2 = $dom->find('p.title a');
 
-        fwrite(STDERR, 'Checking for image at ' . $a2->href . PHP_EOL);
-        if (@exif_imagetype($a2->href) === 3) {
+        if ($a2 && $a2->href && @exif_imagetype($a2->href) === 3) {
+            fwrite(STDERR, 'Checking for image at ' . $a2->href . PHP_EOL);
             $output .= 'image';
             $img = file_get_contents($a2->href);
             $imageFile = basename($a2->href);
@@ -105,13 +104,13 @@ foreach ($links['links'] as $link) {
                 . '<br/>';
         }
     } catch (Throwable $ex) {
-        $output .= $ex->getMessage() . $ex->getFile() . $ex->getLine();
+        $output .= javaTrace($ex);
     }
 }
 
 //var_dump(getopt(null, ['pdf']));die;
 
-//echo $output;
+echo $output;
 
 $mpdf = new \Mpdf\Mpdf();
 $mpdf->WriteHTML($output);
