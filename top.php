@@ -7,7 +7,10 @@
 
 //error_reporting(0);
 
+namespace olleharstedt\top_of_reddit;
+
 require "vendor/autoload.php";
+require "src/Link.php";
 
 use PHPHtmlParser\Dom;
 use Spatie\Async\Process;
@@ -21,8 +24,9 @@ $pool = Pool::create();
 
 $period = $links['period'];
 
-$ext = Extract::extractFromURL('https://www.theguardian.com/world/2019/aug/25/trump-officials-voice-anger-at-g7-focus-on-niche-issues-such-as-climate-change');
-die;
+//$ext = Extract::extractFromURL('https://www.theguardian.com/world/2019/aug/25/trump-officials-voice-anger-at-g7-focus-on-niche-issues-such-as-climate-change');
+//echo ($ext->text);
+//die;
 
 //echo json_encode(mime_content_type(''));
 //$dom = new Dom();
@@ -50,16 +54,16 @@ $output = '';
 
 foreach ($links['links'] as $link) {
     try {
-        $bakedLink = sprintf(
-            'https://old.reddit.com/r/%s/top/?sort=top&t=%s',
-            $link['sub'],
-            $period
-        );
+        /** @var Link */
+        $link = new Link($link);
+
+        $bakedLink = $link->getBakedLink($period);
+
         $dom = new Dom();
         $dom->loadFromUrl($bakedLink);
         $a = $dom->find('#siteTable .top-matter .title a');
         $votes = $dom->find('#siteTable .score.unvoted');
-        $tabs = strlen($link['sub']) < 7 ? "\t\t" : "\t";
+        $tabs = strlen($link->sub) < 7 ? "\t\t" : "\t";
 
         // Check for image
         $dom = new Dom();
@@ -92,7 +96,7 @@ foreach ($links['links'] as $link) {
             if (empty($ext)) {
                 $output .= 'could not extract article';
             }
-            $output .= '<h2>' . $link['sub'] . "</h2>" . $tabs
+            $output .= '<h2>' . $link->sub . "</h2>" . $tabs
                 . $votes->text . ":\t"
                 . $a->text . '<br/>'
                 . nl2br(wordwrap($ext->text, 60, PHP_EOL))
@@ -107,7 +111,7 @@ foreach ($links['links'] as $link) {
 
 //var_dump(getopt(null, ['pdf']));die;
 
-echo $output;
+//echo $output;
 
 $mpdf = new \Mpdf\Mpdf();
 $mpdf->WriteHTML($output);
