@@ -7,7 +7,8 @@
 
 namespace olleharstedt\top_of_reddit;
 
-error_reporting(0);
+//error_reporting(E_ALL);
+//ini_set('display_errors', 1);
 
 require "vendor/autoload.php";
 require "src/Link.php";
@@ -75,7 +76,7 @@ foreach ($links as $link) {
         $dom->loadFromUrl($href);
         $a2 = $dom->find('p.title a');
 
-        if ($a2 && $a2->href && @exif_imagetype($a2->href) === 3) {
+        if ($a2 && $a2->count() > 0 && @exif_imagetype($a2->href) === 3) {
             fwrite(STDERR, 'Checking for image at ' . $a2->href . PHP_EOL);
             $output .= 'image';
             $img = file_get_contents($a2->href);
@@ -91,7 +92,12 @@ foreach ($links as $link) {
             }
         } else {
             fwrite(STDERR, 'Extracting from ' . $href . PHP_EOL);
+
+            // TODO: Has to catch buffer, autoloader wrong?
+            ob_start();
             $ext = Extract::extractFromURL($href);
+            ob_end_clean();
+
             if (empty($ext)) {
                 $output .= 'could not extract article';
             }
@@ -110,7 +116,7 @@ foreach ($links as $link) {
 
 //var_dump(getopt(null, ['pdf']));die;
 
-echo $output;
+//echo $output;
 
 $mpdf = new \Mpdf\Mpdf();
 $mpdf->WriteHTML($output);
